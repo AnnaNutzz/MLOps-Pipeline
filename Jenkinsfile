@@ -26,23 +26,18 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {
-                    // Run tests inside the container. If you have tests, replace the 'echo' command.
-                    docker.image(DOCKER_IMAGE).inside {
-                        echo 'No tests found. Skipping this stage.'
-                        // Example: sh 'pytest'
-                    }
-                }
+                // Since there are no tests, we don't need to run anything in Docker.
+                // When tests are added, they should be run in the container like the training step.
+                echo 'No tests found. Skipping this stage.'
             }
         }
 
         stage('Train Model') {
             steps {
                 script {
-                    // Run the model training script inside the container
-                    docker.image(DOCKER_IMAGE).inside {
-                        sh "python /app/src/train_model.py"
-                    }
+                    // Run the model training script inside a temporary container from our image.
+                    // The --rm flag cleans up the container after the script finishes.
+                    sh "docker run --rm ${DOCKER_IMAGE} python /app/src/train_model.py"
                 }
             }
         }
@@ -54,8 +49,8 @@ pipeline {
                     sh "docker stop ${IMAGE_NAME} || true"
                     sh "docker rm ${IMAGE_NAME} || true"
                     
-                    // Run the new container, mapping port 8080 on the host to port 80 in the container
-                    docker.image(DOCKER_IMAGE).run("--name ${IMAGE_NAME} -p 8080:80")
+                    // Run the new container in detached mode, mapping port 8080 to 80.
+                    sh "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
                 }
             }
         }
