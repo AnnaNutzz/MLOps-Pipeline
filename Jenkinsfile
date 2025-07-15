@@ -26,9 +26,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Since there are no tests, we don't need to run anything in Docker.
-                // When tests are added, they should be run in the container like the training step.
-                echo 'No tests found. Skipping this stage.'
+                script {
+                    // Run the pytest tests inside a temporary container from our image.
+                    sh "docker run --rm ${DOCKER_IMAGE} pytest /app/tests"
+                }
             }
         }
 

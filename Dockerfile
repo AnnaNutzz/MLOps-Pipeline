@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code and the pre-trained model
 COPY ./app /app/app
 COPY ./src /app/src
+COPY ./tests /app/tests
 COPY ./models /app/models
 
 # Expose the port
