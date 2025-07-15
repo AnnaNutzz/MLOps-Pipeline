@@ -2,7 +2,10 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = "venv"
+        // Define the Docker image name and tag
+        IMAGE_NAME = "mlops-pipeline"
+        IMAGE_TAG = "build-${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
     }
 
     stages {
@@ -12,45 +15,34 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh "python3 -m venv ${VENV_DIR}"
-                        sh "source ${VENV_DIR}/bin/activate && pip install -r requirements.txt"
-                    } else {
-                        bat "\"C:\\Users\\askah\\AppData\\Local\\Programs\\Python\\Python313\\python.exe\" -m venv ${VENV_DIR}"
-                        bat "${VENV_DIR}\\Scripts\\activate.bat && pip install -r requirements.txt"
-                    }
+                    // Build the Docker image from the Dockerfile
+                    docker.build(DOCKER_IMAGE, ".")
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo 'No tests found. Skipping this stage.'
-                // In a real project, you would run your tests here.
-                // e.g., sh 'pytest'
+                script {
+                    // Run tests inside the container. If you have tests, replace the 'echo' command.
+                    docker.image(DOCKER_IMAGE).inside {
+                        echo 'No tests found. Skipping this stage.'
+                        // Example: sh 'pytest'
+                    }
+                }
             }
         }
 
         stage('Train Model') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh "source ${VENV_DIR}/bin/activate && python src/train_model.py"
-                    } else {
-                        bat "${VENV_DIR}\\Scripts\\activate.bat && python src/train_model.py"
+                    // Run the model training script inside the container
+                    docker.image(DOCKER_IMAGE).inside {
+                        sh "python /app/src/train_model.py"
                     }
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def imageName = "mlops-pipeline:${env.BUILD_NUMBER}"
-                    docker.build(imageName, ".")
                 }
             }
         }
@@ -58,12 +50,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    def imageName = "mlops-pipeline:${env.BUILD_NUMBER}"
-                    // Stop any existing container with the same name
-                    sh "docker stop mlops-pipeline || true"
-                    sh "docker rm mlops-pipeline || true"
-                    // Run the new container
-                    docker.image(imageName).run("--name mlops-pipeline -p 8080:80")
+                    // Stop any existing container with the same name to avoid conflicts
+                    sh "docker stop ${IMAGE_NAME} || true"
+                    sh "docker rm ${IMAGE_NAME} || true"
+                    
+                    // Run the new container, mapping port 8080 on the host to port 80 in the container
+                    docker.image(DOCKER_IMAGE).run("--name ${IMAGE_NAME} -p 8080:80")
                 }
             }
         }
