@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Run the pytest tests inside a temporary container from our image.
-                    sh "docker run --rm ${DOCKER_IMAGE} pytest /app/tests"
+                    bat "docker run --rm ${DOCKER_IMAGE} pytest /app/tests"
                 }
             }
         }
@@ -38,7 +38,7 @@ pipeline {
                 script {
                     // Run the model training script inside a temporary container from our image.
                     // The --rm flag cleans up the container after the script finishes.
-                    sh "docker run --rm ${DOCKER_IMAGE} python /app/src/train_model.py"
+                    bat "docker run --rm ${DOCKER_IMAGE} python /app/src/train_model.py"
                 }
             }
         }
@@ -47,11 +47,11 @@ pipeline {
             steps {
                 script {
                     // Stop any existing container with the same name to avoid conflicts
-                    sh "docker stop ${IMAGE_NAME} || true"
-                    sh "docker rm ${IMAGE_NAME} || true"
+                    bat "docker stop ${IMAGE_NAME} || true"
+                    bat "docker rm ${IMAGE_NAME} || true"
                     
                     // Run the new container in detached mode, mapping port 8080 to 80.
-                    sh "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
+                    bat "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
                 }
             }
         }
