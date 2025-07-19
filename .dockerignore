@@ -26,7 +26,6 @@ notebooks/
 data/
 
 # Tests
-tests/
 .pytest_cache/
 coverage.xml
 htmlcov/ 
