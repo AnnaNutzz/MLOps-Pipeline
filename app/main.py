@@ -18,7 +18,7 @@ model_path = BASE_DIR / MODEL_PATH
 if not model_path.exists():
     # This is a critical error, so we can raise an exception
     raise RuntimeError(f"Model not found at {model_path}")
-
+    
 # Load the model
 model = load(model_path)
 
@@ -37,6 +37,10 @@ def health():
 def predict(request: PredictionRequest):
     """Prediction endpoint."""
     try:
+        # Handle empty request data gracefully
+        if not request.data:
+            return {"predictions": []}
+
         # Validate input shape
         for sample in request.data:
             if len(sample) != NUM_FEATURES:
