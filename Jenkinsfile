@@ -51,8 +51,8 @@ pipeline {
                     bat "docker stop ${IMAGE_NAME} || ver > nul"
                     bat "docker rm ${IMAGE_NAME} || ver > nul"
                     
-                    // Run the new container in detached mode, mapping port 8080 to 80.
-                    bat "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
+                    // Run the new container in detached mode, mapping port 8088 on the host to port 80 in the container
+                    bat "docker run -d --name ${IMAGE_NAME} -p 8088:80 ${DOCKER_IMAGE}"
                 }
             }
         }
