@@ -27,8 +27,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run the pytest tests inside a temporary container from our image.
-                    bat "docker run --rm ${DOCKER_IMAGE} pytest /app/tests"
+                    // Run pytest inside the container, setting the PYTHONPATH so imports work correctly.
+                    bat "docker run --rm --env PYTHONPATH=/app ${DOCKER_IMAGE} pytest /app/tests"
                 }
             }
         }
