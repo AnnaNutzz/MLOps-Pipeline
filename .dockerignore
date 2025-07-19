@@ -23,7 +23,6 @@ notebooks/
 *.ipynb
 
 # Data
-data/
 
 # Tests
 .pytest_cache/
