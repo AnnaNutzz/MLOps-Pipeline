@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./app /app/app
 COPY ./src /app/src
 COPY ./tests /app/tests
+COPY ./data /app/data
 COPY ./models /app/models
 
 # Expose the port
