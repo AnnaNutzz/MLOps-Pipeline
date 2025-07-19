@@ -47,8 +47,9 @@ pipeline {
             steps {
                 script {
                     // Stop any existing container with the same name to avoid conflicts
-                    bat "docker stop ${IMAGE_NAME} || true"
-                    bat "docker rm ${IMAGE_NAME} || true"
+                    // The `|| ver > nul` is a Windows batch trick to ignore errors if the container doesn't exist
+                    bat "docker stop ${IMAGE_NAME} || ver > nul"
+                    bat "docker rm ${IMAGE_NAME} || ver > nul"
                     
                     // Run the new container in detached mode, mapping port 8080 to 80.
                     bat "docker run -d --name ${IMAGE_NAME} -p 8080:80 ${DOCKER_IMAGE}"
